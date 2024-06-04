@@ -44,7 +44,7 @@ class Boleto
 
         // Merge messages and information
         if (!empty($boleto->getMessages())) {
-            array_merge($base, (new Messages($boleto->getMessages()))->toArray());
+//            array_merge($base, (new Messages($boleto->getMessages()))->toArray());
         }
 
         if (!empty($boleto->getInformation())) {
