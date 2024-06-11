@@ -4,7 +4,7 @@ namespace SicrediAPI\Domain\Boleto;
 
 class Messages
 {
-    private $maxLength = 90;
+    private $maxLength = 110;
     private $maxMessages = 4;
     private $messages = [];
 
