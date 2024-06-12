@@ -14,7 +14,7 @@ class Boleto extends ResourceAbstract
     public function create(BoletoDomain $boleto): BoletoDomain
     {
         $payload = BoletoMapper::mapCreateBoleto($boleto);
-
+debug($payload);
         $response = $this->post('/cobranca/boleto/v1/boletos', [
             'json' => $payload,
             'headers' => [
