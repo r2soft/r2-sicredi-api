@@ -74,6 +74,7 @@ class PaymentInformation
 
     public static function fromArray($data)
     {
+        debug($data);
         return new PaymentInformation(
             $data['txid'] ?? $data['txId'],
             $data['qrCode'] ?? $data['codigoQrCode'],
