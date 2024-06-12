@@ -43,7 +43,7 @@ class Client
             'form_params' => [
                 'username' => $username,
                 'password' => $password,
-                'scope' => 'cobranca',
+                'scope' => 'openid cobranca',
                 'grant_type' => 'password',
             ],
         ]);
@@ -64,7 +64,7 @@ class Client
                 'x-api-key' => $this->apiKey,
             ],
             'form_params' => [
-                'scope' => 'cobranca',
+                'scope' => 'openid cobranca',
                 'grant_type' => 'refresh_token',
                 'refresh_token' => $this->token->getRefreshToken(),
             ],
