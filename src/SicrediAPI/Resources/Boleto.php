@@ -15,7 +15,6 @@ class Boleto extends ResourceAbstract
     public function create(BoletoDomain $boleto): BoletoDomain
     {
         $payload = BoletoMapper::mapCreateBoleto($boleto);
-
         $response = $this->post('/cobranca/boleto/v1/boletos', [
             'json' => $payload,
             'headers' => [
@@ -104,7 +103,7 @@ class Boleto extends ResourceAbstract
                 'linhaDigitavel' => $numericRepresentation
             ]
         ], true);
-        
+
         return $response;
     }
 
