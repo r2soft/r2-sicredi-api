@@ -18,6 +18,7 @@ class Information
             if (strlen($message) > $this->maxLength) {
                 throw new \InvalidArgumentException("Message length must be less than {$this->maxLength} characters");
             }
+
             $this->messages [] = $message;
         }
     }
