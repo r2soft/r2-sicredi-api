@@ -2,8 +2,6 @@
 
 namespace SicrediAPI\Domain;
 
-use SicrediAPI\Helper;
-
 class Token
 {
     private $scope;
@@ -97,9 +95,6 @@ class Token
 
     public static function fromArray(array $data): Token
     {
-        if(empty($data['id_token'])){
-            $data['id_token']=Helper::getValueOfPayload('jti',$data['access_token']);
-        }
         return new Token(
             $data['scope'],
             $data['access_token'],

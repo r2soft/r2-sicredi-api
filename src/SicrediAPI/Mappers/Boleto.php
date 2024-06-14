@@ -21,34 +21,36 @@ class Boleto
             'pagador' => (new Payee($boleto->getPayee()))->toArray(),
             'nossoNumero' => $boleto->getOurNumber(),
             'seuNumero' => $boleto->getYourNumber(),
+            'tipoCobranca' => 'HIBRIDO',
             'dataVencimento' => $boleto->getDueDate()->format('Y-m-d'),
             'valor' => $boleto->getAmount(),
             'codigoBeneficiario' => $boleto->getBeneficiaryCode(),
             'especieDocumento' => $boleto->getDocumentType(),
-            'informativo' => (new Messages($boleto->getInformation()))->toArray(),
-            'mensagem' => (new Messages($boleto->getMessages()))->toArray(),
+            'informativos' => (new Messages($boleto->getInformation()))->toArray(),
+            'mensagens' => (new Messages($boleto->getMessages()))->toArray(),
         ];
 
         if (!empty($boleto->getBeneficiary())) {
-            $base['beneficiarioFinal'] = (new Beneficiary($boleto->getBeneficiary()))->toArray();
+            $base['beneficiario'] = (new Beneficiary($boleto->getBeneficiary()))->toArray();
         }
 
         if (!empty($boleto->getDiscounts())) {
-            array_merge($base, (new DiscountConfiguration($boleto->getDiscounts()))->toArray());
+            $base = array_merge($base, (new DiscountConfiguration($boleto->getDiscounts()))->toArray());
         }
 
         // Merge getInterest
         if (!empty($boleto->getInterests())) {
-            array_merge($base, (new InterestConfiguration($boleto->getInterests()))->toArray());
+            $base = array_merge($base, (new InterestConfiguration($boleto->getInterests()))->toArray());
         }
 
         // Merge messages and information
         if (!empty($boleto->getMessages())) {
-//            array_merge($base, (new Messages($boleto->getMessages()))->toArray());
+            $messages = (new Messages($boleto->getMessages()))->toArray();
+            $base['mensagens'] = $messages->getLines();
         }
 
         if (!empty($boleto->getInformation())) {
-            array_merge($base, (new Information($boleto->getInformation()))->toArray());
+            $base['informativos'] = (new Information($boleto->getInformation()))->toArray();
         }
 
         return array_filter($base, function ($value) {
@@ -58,82 +60,78 @@ class Boleto
 
     /**
      *     {
-    * // PaymentInformation
-    * "linhaDigitavel": "74891121150023100718882848251011287560000000177",
-    * "codigoBarras": "74892875600000001771121100231007188284825101",
-    * "nossoNumero": "211001290",
-    * "txId": "445488181811848",
-    * "codigoQrCode": "00020126930014br.gov.bcb.pix2571pix-qrcode-h.sicredi.com.br/qr/v2/cobv/528520acdd5f4740b63b9b643ca2bcf99999999999999999999BR5903PIX6006Cidade62070503***630441AC\n\n",
-
-
-    * "carteira": "SIMPLES", // wallet
-    * "seuNumero": "MOCKDDA", // yourNumber
-    *
-    * // Payee
-    * "pagador": {
-    *     "codigo": "02LNG",
-    *     "documento": "01234567890",
-    *     "nome": "PAGADOR DDA"
-    * },
-
-    * // Beneficiary
-    * "beneficiarioFinal": {
-    *     "codigo": "R8N",
-    *     "documento": "01234567890",
-    *     "nome": "PAGADOR DDA"
-    * },
-
-
-    * "dataEmissao": "2021-08-24", // issueDate
-    * "dataVencimento": "2021-09-27", // dueDate
-    * "valorNominal": 90,  // amount
-    * "situacao": "LIQUIDADO", // status
-    *
-    * // InterestConfiguration
-    * "multa": 0.05,
-    * "abatimento": 0,
-    * "tipoJuros": "A - VALOR",
-    * "juros": 0.01,
-    * "diasProtesto": 3,
-    * "validadeAposVencimento": 1,
-    * "diasNegativacao": 0,
-    *
-    * // Liquidation
-    * "dadosLiquidacao": {
-    *     "data": "2021-09-27T03:00:00.000+0000",
-    *     "valor": 80,
-    *     "multa": 2.67,
-    *     "abatimento": 15.99,
-    *     "juros": 5.13,
-    *     "desconto": 10
-    * },
-    *
-    * // DiscountConfiguration
-    * "descontoAntecipacao": 0,
-    * "tipoDesconto": "A - VALOR",
-    * "descontos": [
-    *     {
-    * * "numeroOrdem": 1,
-    * * "valorDesconto": 10,
-    * * "dataLimite": "2021-10-05"
-    *     },
-    *     {
-    * * "numeroOrdem": 2,
-    * * "valorDesconto": 5,
-    * * "dataLimite": "2021-10-06"
-    *     },
-    *     {
-    * * "numeroOrdem": 3,
-    * * "valorDesconto": 3,
-    * * "dataLimite": "2021-10-07"
-    *     }
-    * ]
-    * }
+     * // PaymentInformation
+     * "linhaDigitavel": "74891121150023100718882848251011287560000000177",
+     * "codigoBarras": "74892875600000001771121100231007188284825101",
+     * "nossoNumero": "211001290",
+     * "txId": "445488181811848",
+     * "codigoQrCode": "00020126930014br.gov.bcb.pix2571pix-qrcode-h.sicredi.com.br/qr/v2/cobv/528520acdd5f4740b63b9b643ca2bcf99999999999999999999BR5903PIX6006Cidade62070503***630441AC\n\n",
+     * "carteira": "SIMPLES", // wallet
+     * "seuNumero": "MOCKDDA", // yourNumber
+     *
+     * // Payee
+     * "pagador": {
+     *     "codigo": "02LNG",
+     *     "documento": "01234567890",
+     *     "nome": "PAGADOR DDA"
+     * },
+     * // Beneficiary
+     * "beneficiarioFinal": {
+     *     "codigo": "R8N",
+     *     "documento": "01234567890",
+     *     "nome": "PAGADOR DDA"
+     * },
+     * "dataEmissao": "2021-08-24", // issueDate
+     * "dataVencimento": "2021-09-27", // dueDate
+     * "valorNominal": 90,  // amount
+     * "situacao": "LIQUIDADO", // status
+     *
+     * // InterestConfiguration
+     * "multa": 0.05,
+     * "abatimento": 0,
+     * "tipoJuros": "A - VALOR",
+     * "juros": 0.01,
+     * "diasProtesto": 3,
+     * "validadeAposVencimento": 1,
+     * "diasNegativacao": 0,
+     *
+     * // Liquidation
+     * "dadosLiquidacao": {
+     *     "data": "2021-09-27T03:00:00.000+0000",
+     *     "valor": 80,
+     *     "multa": 2.67,
+     *     "abatimento": 15.99,
+     *     "juros": 5.13,
+     *     "desconto": 10
+     * },
+     *
+     * // DiscountConfiguration
+     * "descontoAntecipacao": 0,
+     * "tipoDesconto": "A - VALOR",
+     * "descontos": [
+     *     {
+     * * "numeroOrdem": 1,
+     * * "valorDesconto": 10,
+     * * "dataLimite": "2021-10-05"
+     *     },
+     *     {
+     * * "numeroOrdem": 2,
+     * * "valorDesconto": 5,
+     * * "dataLimite": "2021-10-06"
+     *     },
+     *     {
+     * * "numeroOrdem": 3,
+     * * "valorDesconto": 3,
+     * * "dataLimite": "2021-10-07"
+     *     }
+     * ]
+     * }
      * @param array $boleto
      * @return BoletoDomain
      */
     public static function mapFromQuery($data): BoletoDomain
     {
+
         $beneficiary = new BeneficiaryDomain(
             $data['beneficiarioFinal']['nome'],
             $data['beneficiarioFinal']['documento'],

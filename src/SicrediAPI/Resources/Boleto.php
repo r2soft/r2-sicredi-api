@@ -4,6 +4,7 @@ namespace SicrediAPI\Resources;
 
 use DateTime;
 use GuzzleHttp\Exception\GuzzleException;
+use mysql_xdevapi\Exception;
 use SicrediAPI\Domain\Boleto\Boleto as BoletoDomain;
 use SicrediAPI\Domain\Boleto\Liquidation;
 use SicrediAPI\Domain\Boleto\PaymentInformation;
@@ -14,7 +15,7 @@ class Boleto extends ResourceAbstract
     public function create(BoletoDomain $boleto): BoletoDomain
     {
         $payload = BoletoMapper::mapCreateBoleto($boleto);
-debug(json_encode($payload));
+
         $response = $this->post('/cobranca/boleto/v1/boletos', [
             'json' => $payload,
             'headers' => [
@@ -103,7 +104,7 @@ debug(json_encode($payload));
                 'linhaDigitavel' => $numericRepresentation
             ]
         ], true);
-
+        
         return $response;
     }
 

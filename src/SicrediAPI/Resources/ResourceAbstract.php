@@ -42,9 +42,12 @@ abstract class ResourceAbstract
     protected function get($url, $options = [])
     {
         $this->checkToken();
-
-        $response = $this->apiClient->getHttpClient()->get($this->apiClient->getBaseUrl() . $url, $this->buildRequestOptions($options));
-
+        try {
+            $response = $this->apiClient->getHttpClient()->get($this->apiClient->getBaseUrl() . $url, $this->buildRequestOptions($options));
+        } catch (\GuzzleHttp\Exception\ClientException $th) {
+            $response = json_decode($th->getResponse()->getBody()->getContents());
+            return $response;
+        }
         return $this->response($response);
     }
 

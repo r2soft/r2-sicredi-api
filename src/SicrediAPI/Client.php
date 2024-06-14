@@ -64,7 +64,7 @@ class Client
                 'x-api-key' => $this->apiKey,
             ],
             'form_params' => [
-                'scope' => 'openid cobranca',
+                'scope' => 'cobranca',
                 'grant_type' => 'refresh_token',
                 'refresh_token' => $this->token->getRefreshToken(),
             ],

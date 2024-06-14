@@ -89,7 +89,7 @@ class ClientTest extends TestCase
 
         // Mock the HTTP response
         $response = new Response(200, [], json_encode([
-            'scope' => 'openid cobranca',
+            'scope' => 'cobranca',
             'access_token' => $accessToken,
             'refresh_token' => $refreshToken,
             'expires_in' => $expiresIn,
@@ -140,7 +140,7 @@ class ClientTest extends TestCase
     public function testRefreshToken()
     {
         $expectedToken = [
-            'scope' => 'openid cobranca',
+            'scope' => 'cobranca',
             'access_token' => $this->faker->md5,
             'refresh_token' => $this->faker->md5,
             'expires_in' => 3600,

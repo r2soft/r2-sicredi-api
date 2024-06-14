@@ -57,23 +57,4 @@ class Helper
 
         return $found ? $found : false;
     }
-
-    public static function getValueOfPayload($key, $token)
-    {
-        try {
-            if (!empty($token['access_token'])) {
-                $token = $token['access_token'];
-            } else {
-                if (empty($token)) {
-                    return null;
-                }
-            }
-            $payload = explode('.', $token)[1];
-            $payload = json_decode(base64_decode($payload), true);
-            return $payload[$key] ?? null;
-        } catch (\Exception $e) {
-            throw new \Exception($e->getMessage(), $e->getCode());
-
-        }
-    }
 }

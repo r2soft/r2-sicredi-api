@@ -16,7 +16,7 @@ class PaymentInformation
     /**
      * @var int ID of the transaction
      */
-    private int $transactionId;
+    private string $transactionId;
 
     /**
      * @var string String that represents a QR Code
@@ -74,7 +74,7 @@ class PaymentInformation
 
     public static function fromArray($data)
     {
-        debug($data);
+        
         return new PaymentInformation(
             $data['txid'] ?? $data['txId'],
             $data['qrCode'] ?? $data['codigoQrCode'],
