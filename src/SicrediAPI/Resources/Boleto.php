@@ -15,6 +15,7 @@ class Boleto extends ResourceAbstract
     public function create(BoletoDomain $boleto): BoletoDomain
     {
         $payload = BoletoMapper::mapCreateBoleto($boleto);
+
         $response = $this->post('/cobranca/boleto/v1/boletos', [
             'json' => $payload,
             'headers' => [
@@ -22,14 +23,39 @@ class Boleto extends ResourceAbstract
                 'posto' => $this->apiClient->getPost(),
             ]
         ]);
-
-        $paymentInformation = PaymentInformation::fromArray($response);
+        $error = json_decode($response, true);
+        if (!empty($error['code'])) {
+            if (!empty($error['message']) && ($error['message'] === 'Negócio: Nosso número já existe.')) {
+                $queryExistBilletIfPrint = $this->queryExistBilletIfPrint($payload['nossoNumero']);
+                $paymentInformation = PaymentInformation::fromArray($queryExistBilletIfPrint);
+            } else {
+                throw new \Exception($error['message'], $error['code']);
+            }
+        } else {
+            $paymentInformation = PaymentInformation::fromArray($response);
+        }
 
         $boleto->setPaymentInformation($paymentInformation);
-
         if ($boleto->getOurNumber() === null) {
             $boleto->setOurNumber($paymentInformation->getOurNumber());
         }
+
+        return $boleto;
+    }
+
+    public function queryExistBilletIfPrint(string $ourNumber)
+    {
+        $response = $this->get('/cobranca/boleto/v1/boletos/', [
+            'query' => [
+                'codigoBeneficiario' => $this->apiClient->getBeneficiaryCode(),
+                'nossoNumero' => $ourNumber,
+            ],
+            'headers' => [
+                'cooperativa' => $this->apiClient->getCooperative(),
+                'posto' => $this->apiClient->getPost(),
+            ]
+        ]);
+        $boleto = $response;
 
         return $boleto;
     }
