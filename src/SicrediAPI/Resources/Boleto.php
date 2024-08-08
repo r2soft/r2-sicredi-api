@@ -55,6 +55,7 @@ class Boleto extends ResourceAbstract
                 'posto' => $this->apiClient->getPost(),
             ]
         ]);
+
         $boleto = $response;
 
         return $boleto;
