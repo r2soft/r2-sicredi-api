@@ -31,6 +31,7 @@ class Boleto extends ResourceAbstract
             } else {
                 throw new \Exception($error['message'], $error['code']);
             }
+
         } else {
             $paymentInformation = PaymentInformation::fromArray($response);
         }
