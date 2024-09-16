@@ -23,15 +23,17 @@ class Boleto extends ResourceAbstract
                 'posto' => $this->apiClient->getPost(),
             ]
         ]);
-        $error = json_decode($response, true);
-        if (!empty($error['code'])) {
-            if (!empty($error['message']) && ($error['message'] === 'Negócio: Nosso número já existe.')) {
-                $queryExistBilletIfPrint = $this->queryExistBilletIfPrint($payload['nossoNumero']);
-                $paymentInformation = PaymentInformation::fromArray($queryExistBilletIfPrint);
-            } else {
-                throw new \Exception($error['message'], $error['code']);
-            }
 
+        if (empty($response['nossoNumero'])) {
+            $error = json_decode($response, true);
+            if (!empty($error['code'])) {
+                if (!empty($error['message']) && ($error['message'] === 'Negócio: Nosso número já existe.')) {
+                    $queryExistBilletIfPrint = $this->queryExistBilletIfPrint($payload['nossoNumero']);
+                    $paymentInformation = PaymentInformation::fromArray($queryExistBilletIfPrint);
+                } else {
+                    throw new \Exception($error['message'], $error['code']);
+                }
+            }
         } else {
             $paymentInformation = PaymentInformation::fromArray($response);
         }
@@ -132,6 +134,19 @@ class Boleto extends ResourceAbstract
             ]
         ], true);
 
+        return $response;
+    }
+
+    public function instructionLowTitle(string $ourNumber)
+    {
+        $response = $this->patch("/cobranca/boleto/v1/boletos/$ourNumber/baixa", [
+            'headers' => [
+                'codigoBeneficiario' => $this->apiClient->getBeneficiaryCode(),
+                'cooperativa' => $this->apiClient->getCooperative(),
+                'posto' => $this->apiClient->getPost(),
+            ],
+            'json' => (object) []
+        ]);
         return $response;
     }
 

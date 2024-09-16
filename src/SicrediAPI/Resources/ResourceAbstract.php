@@ -94,6 +94,19 @@ abstract class ResourceAbstract
         return $this->sandboxResponseFixes($response);
     }
 
+    protected function patch($url, $options = [])
+    {
+        $this->checkToken();
+        try {
+            $response = $this->apiClient->getHttpClient()->patch($this->apiClient->getBaseUrl() . $url, $this->buildRequestOptions($options));
+        } catch (\GuzzleHttp\Exception\ClientException $th) {
+            $response = json_decode($th->getResponse()->getBody()->getContents());
+            return $response;
+        }
+
+        return $this->response($response);
+    }
+
     /**
      * Fix some issues with sandbox responses because it doesn't conform to the API documentation
      * This needs a better solution in the future but for now it's ok
