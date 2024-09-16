@@ -249,6 +249,7 @@ class Boleto
         //     throw new \InvalidArgumentException("Invalid status");
         // }
 
+
         $this->status = $status;
     }
 

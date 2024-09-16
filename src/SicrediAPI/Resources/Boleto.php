@@ -137,6 +137,7 @@ class Boleto extends ResourceAbstract
         return $response;
     }
 
+
     public function instructionLowTitle(string $ourNumber)
     {
         $response = $this->patch("/cobranca/boleto/v1/boletos/$ourNumber/baixa", [
