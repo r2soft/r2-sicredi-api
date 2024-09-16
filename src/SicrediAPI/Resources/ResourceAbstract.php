@@ -128,6 +128,7 @@ abstract class ResourceAbstract
             $response['pagador']['documento'] = '98765432100';
         }
 
+
         /**
          * Discount dates must be between issuance date and due date, and must be in crescent order
          */
