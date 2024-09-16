@@ -123,6 +123,7 @@ abstract class ResourceAbstract
         /**
          * Payees must not have the same document key as the beneficiary
          */
+
         if (isset($response['pagador']['documento'])) {
             $response['pagador']['documento'] = '98765432100';
         }
