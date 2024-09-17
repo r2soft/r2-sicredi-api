@@ -15,7 +15,11 @@ class Boleto extends ResourceAbstract
     public function create(BoletoDomain $boleto): BoletoDomain
     {
         $payload = BoletoMapper::mapCreateBoleto($boleto);
-
+        array_walk_recursive($payload, function (&$item) {
+            if (!mb_check_encoding($item, 'UTF-8')) {
+                $item = utf8_encode($item);
+            }
+        });
         $response = $this->post('/cobranca/boleto/v1/boletos', [
             'json' => $payload,
             'headers' => [
@@ -23,7 +27,6 @@ class Boleto extends ResourceAbstract
                 'posto' => $this->apiClient->getPost(),
             ]
         ]);
-
         if (empty($response['nossoNumero'])) {
             $error = json_decode($response, true);
             if (!empty($error['code'])) {
@@ -134,9 +137,11 @@ class Boleto extends ResourceAbstract
             ]
         ], true);
 
+        if (!empty($response->error)) {
+            throw new \Exception('Erro (PACOTE) ao gerar PDF: ' . $response->message);
+        }
         return $response;
     }
-
 
     public function instructionLowTitle(string $ourNumber)
     {
@@ -150,5 +155,4 @@ class Boleto extends ResourceAbstract
         ]);
         return $response;
     }
-
 }
