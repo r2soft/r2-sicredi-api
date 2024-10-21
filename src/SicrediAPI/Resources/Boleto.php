@@ -155,4 +155,19 @@ class Boleto extends ResourceAbstract
         ]);
         return $response;
     }
+
+    public function instructionChangeExpiryDate(string $ourNumber, string $dataVencimento)
+    {
+        $response = $this->patch("/cobranca/boleto/v1/boletos/$ourNumber/data-vencimento", [
+            'headers' => [
+                'codigoBeneficiario' => $this->apiClient->getBeneficiaryCode(),
+                'cooperativa' => $this->apiClient->getCooperative(),
+                'posto' => $this->apiClient->getPost(),
+            ],
+            'json' => (object) [
+                'dataVencimento' => $dataVencimento
+            ]
+        ]);
+        return $response;
+    }
 }

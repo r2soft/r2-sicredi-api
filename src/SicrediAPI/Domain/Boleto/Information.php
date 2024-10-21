@@ -4,7 +4,7 @@ namespace SicrediAPI\Domain\Boleto;
 
 class Information
 {
-    private $maxLength = 90;
+    private $maxLength = 80;
     private $maxMessages = 5;
     private $messages = [];
 
@@ -14,13 +14,15 @@ class Information
             throw new \InvalidArgumentException("Messages count must be less than {$this->maxMessages}");
         }
 
-        foreach ($messages as $message) {
+        foreach ($messages as $key => $message) {
+            if (trim($message) === '') {
+                unset($messages[$key]);
+            }
             if (strlen($message) > $this->maxLength) {
                 throw new \InvalidArgumentException("Message length must be less than {$this->maxLength} characters");
             }
-
-            $this->messages [] = $message;
         }
+        $this->messages = array_values($messages);
     }
 
     public function getLines()

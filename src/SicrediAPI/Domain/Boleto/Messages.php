@@ -23,7 +23,7 @@ class Messages
             }
         }
 
-        $this->messages = $messages;
+        $this->messages = array_values($messages);
     }
 
     public function getLines()
