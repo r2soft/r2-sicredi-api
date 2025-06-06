@@ -56,7 +56,7 @@ class Boleto
         Payee $payee,
         float $amount,
         string $chargeKind = null,
-        int $beneficiaryCode = null,
+        string $beneficiaryCode = null,
         string $documentType = null,
         string $yourNumber,
         DateTime $dueDate,
