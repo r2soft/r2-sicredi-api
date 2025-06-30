@@ -16,12 +16,12 @@ class PaymentInformation
     /**
      * @var int ID of the transaction
      */
-    private string $transactionId;
+    private string|null $transactionId;
 
     /**
-     * @var string String that represents a QR Code
+     * @var string|null String that represents a QR Code
      */
-    private string $qrCode;
+    private string|null $qrCode;
 
     /**
      * @var string Numeric representation of the boleto - "linha digitável"
