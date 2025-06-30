@@ -21,7 +21,7 @@ class Boleto
             'pagador' => (new Payee($boleto->getPayee()))->toArray(),
             'nossoNumero' => $boleto->getOurNumber(),
             'seuNumero' => $boleto->getYourNumber(),
-            'tipoCobranca' => 'HIBRIDO',
+            'tipoCobranca' => $boleto->getChargeKind(),
             'dataVencimento' => $boleto->getDueDate()->format('Y-m-d'),
             'valor' => $boleto->getAmount(),
             'codigoBeneficiario' => $boleto->getBeneficiaryCode(),
