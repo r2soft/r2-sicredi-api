@@ -170,4 +170,101 @@ class Boleto extends ResourceAbstract
         ]);
         return $response;
     }
+
+    public function createOrUpdateContract(string $webhookUrl, ?string $contractId = null)
+    {
+        $endpoint = '/cobranca/boleto/v1/webhook/contrato';
+
+        if ($contractId !== null && $contractId !== '') {
+            $endpoint .= '/' . $contractId;
+        } else {
+            $consulta = $this->get('/cobranca/boleto/v1/webhook/contratos/', [
+                'query' => [
+                    'cooperativa' => $this->apiClient->getCooperative(),
+                    'posto' => $this->apiClient->getPost(),
+                    'beneficiario' => $this->apiClient->getBeneficiaryCode()
+                ]
+            ]);
+
+            $contractId = is_array($consulta) ? ($consulta['idContrato'] ?? null) : ($consulta->idContrato ?? null);
+
+            if (!empty($contractId)) {
+                $endpoint .= '/' . $contractId;
+            }
+
+        }
+
+        $payload = [
+            'cooperativa'     => $this->apiClient->getCooperative(),
+            'posto'           => $this->apiClient->getPost(),
+            'codBeneficiario' => $this->apiClient->getBeneficiaryCode(),
+            'eventos'         => ['LIQUIDACAO'],
+            'url'             => $webhookUrl,
+            'urlStatus'       => 'ATIVO',
+            'contratoStatus'  => 'ATIVO',
+            'nomeResponsavel' => 'R2 Soft - Software',
+            'email'           => 'r2soft@r2soft.com.br',
+            'telefone'        => '62 3326-3926',
+        ];
+
+        try {
+            if ($contractId !== null && $contractId !== '') {
+                $response = $this->put($endpoint, ['json' => $payload]);
+            } else {
+                $response = $this->post($endpoint, ['json' => $payload]);
+            }
+
+        } catch (\Throwable $e) {
+            throw new \RuntimeException('Falha ao criar/atualizar contrato de webhook: ' . $e->getMessage(), (int)$e->getCode(), $e);
+        }
+
+        if ((is_array($response) && !empty($response['error'])) || (is_object($response) && !empty($response->error))) {
+            $msg = is_array($response) ? ($response['message'] ?? 'Erro desconhecido') : ($response->message ?? 'Erro desconhecido');
+            throw new \RuntimeException('Erro na API: ' . $msg);
+        }
+
+        if (is_string($response)) {
+            $decoded = json_decode($response, true);
+
+            if (json_last_error() === JSON_ERROR_NONE) {
+                $hasError = !empty($decoded['error']) || (!empty($decoded['code']) && (int)$decoded['code'] >= 400);
+
+                if ($hasError) {
+                    $this->throwUserFriendlyApiError($decoded, 'criar/atualizar o contrato de webhook');
+                }
+
+                return $decoded;
+            }
+        }
+
+        return $response;
+    }
+
+    private function throwUserFriendlyApiError(array $err, string $acao = 'processar a solicitação'): void
+    {
+        $code = isset($err['code']) ? (int)$err['code'] : 0;
+        $error = $err['error'] ?? null;
+        $message = $err['message'] ?? 'Erro desconhecido';
+
+        $friendly = match (true) {
+            $code === 422 && $message === 'Falha na busca do beneficiário'
+            => 'Não foi possível localizar o beneficiário no Sicredi. Verifique o código do beneficiário, cooperativa e posto da conta e tente novamente.',
+
+            $code === 422
+            => 'Não foi possível concluir o cadastro no Sicredi porque alguns dados estão inválidos ou incompletos. Revise as configurações e tente novamente.',
+
+            $code === 401 || $code === 403
+            => 'Não foi possível autenticar no Sicredi. Verifique as credenciais e permissões da integração.',
+
+            $code >= 500
+            => 'O Sicredi está temporariamente indisponível. Tente novamente em alguns minutos.',
+
+            default
+            => "Não foi possível {$acao}. Revise as configurações e tente novamente.",
+        };
+
+        $detail = trim(sprintf('%s (HTTP %s): %s', $error ?: 'ERROR', $code ?: '—', $message));
+
+        throw new \RuntimeException($friendly . ' Detalhes: ' . $detail, $code);
+    }
 }
